@@ -41,7 +41,7 @@ jobs:
             make lint
   build:
     docker:
-      - image: cimg/python:3.11.4
+      - image: circleci/python:3.7.3-stretch
     working_directory: ~/repo
     steps:
       - checkout
