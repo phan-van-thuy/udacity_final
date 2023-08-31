@@ -110,6 +110,7 @@ jobs:
           command: docker system prune
 
 workflows:
+  version: 2
   default:
     jobs:
       - lint:
