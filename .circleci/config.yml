@@ -74,7 +74,7 @@ jobs:
 
   deploy:
     docker:
-      - image: cimg/python:3.11.4
+      - image: circleci/python:3.7.3-stretch
     working_directory: ~/repo
     steps:
       - checkout
@@ -94,18 +94,31 @@ jobs:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set default.region us-east-1 
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ./k8s/deploytment.yaml
-          resource-name: deployment/final-app
-          get-rollout-status: true
-          show-kubectl-command: true
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ./k8s/aws-auth-cm.yaml
-          resource-name: configmap/aws-auth
       - run:
-          name: Run test
+          name: Deployment configmap to eks 
           command: |
-            kubectl get all
+            kubectl apply -f ./k8s/aws-auth-cm.yaml
+      - run:
+          name: Deploytment app to eks 
+          command: |
+            kubectl apply -f ./k8s/deploytment.yaml
+      - run:
+          name: Run test SVC
+          command: |
+            kubectl get pods
+            kubectl get services
+            sleep 30
+            for attempt in {1..20}; do
+              EXTERNAL_IP=$(kubectl get service demoapp | awk '{print $4}' | tail -n1)
+              echo "Checking external IP: ${EXTERNAL_IP}"
+              if [ -n "${EXTERNAL_IP}" ] && [ -z $(echo "${EXTERNAL_IP}" | grep "pending") ]; then
+                break
+              fi
+              echo "Waiting for external IP to be ready: ${EXTERNAL_IP}"
+              sleep 10
+            done
+            sleep 180
+            curl -s --retry 10 "http://$EXTERNAL_IP"
 
 workflows:
   version: 2
