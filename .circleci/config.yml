@@ -52,7 +52,6 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt install -y tar gzip curl awscli
-      - kubernetes/install-kubectl
       - run:
           name: Docker login
           command: |
