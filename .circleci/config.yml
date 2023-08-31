@@ -111,9 +111,6 @@ jobs:
           name: Run test
           command: |
             kubectl get all
-      - run:
-          name: Clean all 
-          command: docker system prune
 
 workflows:
   version: 2
