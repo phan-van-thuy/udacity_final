@@ -112,13 +112,13 @@ jobs:
 workflows:
   default:
     jobs:
-      - test:
+      - lint:
           filters:
             branches:
               only: 
                 - dev
       - build:
-          requires: [test]
+          requires: [lint]
           filters:
             branches:
               only: 
